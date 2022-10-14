@@ -15,7 +15,7 @@ func main() {
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
-	router := r.Group("")
+	router := r.Group("/")
 	{
 		router.Use(middlewares.Authorizes())
 		{

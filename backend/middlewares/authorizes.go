@@ -13,7 +13,8 @@ func Authorizes() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		clientToken := c.Request.Header.Get("Authorization")
 		if clientToken == "" {
-			c.AbortWithStatus(http.StatusForbidden)
+			c.AbortWithStatusJSON(http.StatusForbidden, gin.H{"error": "No Authorization header provided"})
+			return
 		}
 
 		extractedToken := strings.Split(clientToken, "Bearer ")
@@ -21,7 +22,8 @@ func Authorizes() gin.HandlerFunc {
 		if len(extractedToken) == 2 {
 			clientToken = strings.TrimSpace(extractedToken[1])
 		} else {
-			c.AbortWithStatus(http.StatusBadRequest)
+			c.AbortWithStatusJSON(http.StatusBadRequest, gin.H{"error": "Incorrect Format of Authorization Token"})
+			return
 		}
 
 		jwtWrapper := service.JwtWrapper{
@@ -31,9 +33,12 @@ func Authorizes() gin.HandlerFunc {
 
 		_, err := jwtWrapper.ValidateToken(clientToken)
 		if err != nil {
-			c.AbortWithStatus(http.StatusUnauthorized)
+			c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+			return
+
 		}
 		// c.Set("email", claims.Email)
-		// c.Next()
+		c.Next()
 	}
+
 }
