@@ -19,7 +19,7 @@ func CreateVideo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": video})
+	c.JSON(http.StatusCreated, gin.H{"data": video})
 }
 
 // GET /video/:id
@@ -27,8 +27,8 @@ func GetVideo(c *gin.Context) {
 	var video entity.Video
 
 	id := c.Param("id")
-	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM videos WHERE id = ?", id).Find(&video).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if tx := entity.DB().Where("id = ?", id).First(&video); tx.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "video not found"})
 		return
 	}
 
@@ -39,6 +39,17 @@ func GetVideo(c *gin.Context) {
 func ListVideos(c *gin.Context) {
 	var videos []entity.Video
 	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM videos").Find(&videos).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": videos})
+}
+
+func ListMyVideos(c *gin.Context) {
+	owner_id := c.Param("owner_id")
+	var videos []entity.Video
+	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM videos WHERE owner_id=?", owner_id).Find(&videos).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}

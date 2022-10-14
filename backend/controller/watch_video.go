@@ -51,15 +51,15 @@ func CreateWatchVideo(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": wv})
+	c.JSON(http.StatusCreated, gin.H{"data": wv})
 }
 
 // GET /watchvideo/:id
 func GetWatchVideo(c *gin.Context) {
 	var watchvideo entity.WatchVideo
 	id := c.Param("id")
-	if err := entity.DB().Preload("Resolution").Preload("Playlist").Preload("Video").Raw("SELECT * FROM watch_videos WHERE id = ?", id).Find(&watchvideo).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if tx := entity.DB().Where("id = ?", id).First(&watchvideo); tx.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "watchvideo not found"})
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": watchvideo})

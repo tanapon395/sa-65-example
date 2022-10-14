@@ -19,7 +19,7 @@ func CreatePlaylist(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": playlist})
+	c.JSON(http.StatusCreated, gin.H{"data": playlist})
 }
 
 // GET /playlist/:id
@@ -30,20 +30,24 @@ func GetPlaylist(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-
-	c.JSON(http.StatusOK, gin.H{"data": playlist})
-}
-
-// GET /playlist/watched/user/:id
-func GetPlaylistWatchedByUser(c *gin.Context) {
-	var playlist entity.Playlist
-	id := c.Param("id")
-	if err := entity.DB().Preload("Owner").Raw("SELECT * FROM playlists WHERE owner_id = ? AND title = ?", id, "Watched").Find(&playlist).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if playlist.ID == 0 {
+		c.JSON(http.StatusNotFound, gin.H{"error": "id not found"})
 		return
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": playlist})
+}
+
+// GET /playlist/watched/user/:uid
+func GetPlaylistWatchedByUser(c *gin.Context) {
+	var playlists []entity.Playlist
+	owner_id := c.Param("owner_id")
+	if err := entity.DB().Preload("Owner").Preload("WatchVideos.Resolution").Preload("WatchVideos").Preload("WatchVideos.Video").Raw("SELECT * FROM playlists WHERE owner_id = ? AND title = ?", owner_id, "Watched").Find(&playlists).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"data": playlists})
 }
 
 // GET /playlists

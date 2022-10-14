@@ -15,6 +15,13 @@ type LoginPayload struct {
 	Password string `json:"password"`
 }
 
+// SignUpPayload signup body
+type SignUpPayload struct {
+	Name     string `json:"name"`
+	Email    string `json:"email"`
+	Password string `json:"password"`
+}
+
 // LoginResponse token response
 type LoginResponse struct {
 	Token string `json:"token"`
@@ -39,7 +46,7 @@ func Login(c *gin.Context) {
 	// ตรวจสอบรหัสผ่าน
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(payload.Password))
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user credentials"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": "password is incerrect"})
 		return
 	}
 
@@ -66,4 +73,33 @@ func Login(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, gin.H{"data": tokenResponse})
+}
+
+// POST /create
+func CreateUser(c *gin.Context) {
+	var payload SignUpPayload
+	var user entity.User
+
+	if err := c.ShouldBindJSON(&payload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	// เข้ารหัสลับรหัสผ่านที่ผู้ใช้กรอกก่อนบันทึกลงฐานข้อมูล
+	hashPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Password), 14)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "error hashing password"})
+		return
+	}
+
+	user.Name = payload.Name
+	user.Email = payload.Email
+	user.Password = string(hashPassword)
+
+	if err := entity.DB().Create(&user).Error; err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusCreated, gin.H{"data": user})
 }

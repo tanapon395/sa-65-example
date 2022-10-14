@@ -7,62 +7,64 @@ import (
 	"github.com/tanapon395/sa-65-example/middlewares"
 )
 
+const PORT = "8081"
+
 func main() {
 	entity.SetupDatabase()
 
 	r := gin.Default()
 	r.Use(CORSMiddleware())
 
-	api := r.Group("")
+	router := r.Group("")
 	{
-		protected := api.Use(middlewares.Authorizes())
+		router.Use(middlewares.Authorizes())
 		{
 			// User Routes
-			protected.GET("/users", controller.ListUsers)
-			protected.GET("/user/:id", controller.GetUser)
-			protected.PATCH("/users", controller.UpdateUser)
-			protected.DELETE("/users/:id", controller.DeleteUser)
+			router.GET("/users", controller.ListUsers)
+			router.GET("/user/:id", controller.GetUser)
+			router.PATCH("/users", controller.UpdateUser)
+			router.DELETE("/users/:id", controller.DeleteUser)
 
 			// Video Routes
-			protected.GET("/videos", controller.ListVideos)
-			protected.GET("/video/:id", controller.GetVideo)
-			protected.POST("/videos", controller.CreateVideo)
-			protected.PATCH("/videos", controller.UpdateVideo)
-			protected.DELETE("/videos/:id", controller.DeleteVideo)
+			router.GET("/videos", controller.ListVideos)
+			router.GET("/my_videos/:owner_id", controller.ListMyVideos)
+			router.GET("/video/:id", controller.GetVideo)
+			router.POST("/videos", controller.CreateVideo)
+			router.PATCH("/videos", controller.UpdateVideo)
+			router.DELETE("/videos/:id", controller.DeleteVideo)
 
 			// Playlist Routes
-			protected.GET("/playlists", controller.ListPlaylists)
-			protected.GET("/playlist/:id", controller.GetPlaylist)
-			protected.GET("/playlist/watched/user/:id", controller.GetPlaylistWatchedByUser)
-			protected.POST("/playlists", controller.CreatePlaylist)
-			protected.PATCH("/playlists", controller.UpdatePlaylist)
-			protected.DELETE("/playlists/:id", controller.DeletePlaylist)
+			router.GET("/playlists", controller.ListPlaylists)
+			router.GET("/playlist/:id", controller.GetPlaylist)
+			router.GET("/playlist/watched/user/:owner_id", controller.GetPlaylistWatchedByUser)
+			router.POST("/playlists", controller.CreatePlaylist)
+			router.PATCH("/playlists", controller.UpdatePlaylist)
+			router.DELETE("/playlists/:id", controller.DeletePlaylist)
 
 			// Resolution Routes
-			protected.GET("/resolutions", controller.ListResolutions)
-			protected.GET("/resolution/:id", controller.GetResolution)
-			protected.POST("/resolutions", controller.CreateResolution)
-			protected.PATCH("/resolutions", controller.UpdateResolution)
-			protected.DELETE("/resolutions/:id", controller.DeleteResolution)
+			router.GET("/resolutions", controller.ListResolutions)
+			router.GET("/resolution/:id", controller.GetResolution)
+			router.POST("/resolutions", controller.CreateResolution)
+			router.PATCH("/resolutions", controller.UpdateResolution)
+			router.DELETE("/resolutions/:id", controller.DeleteResolution)
 
 			// WatchVideo Routes
-			protected.GET("/watch_videos", controller.ListWatchVideos)
-			protected.GET("/watchvideo/:id", controller.GetWatchVideo)
-			protected.POST("/watch_videos", controller.CreateWatchVideo)
-			protected.PATCH("/watch_videos", controller.UpdateWatchVideo)
-			protected.DELETE("/watchvideors/:id", controller.DeleteWatchVideo)
+			router.GET("/watch_videos", controller.ListWatchVideos)
+			router.GET("/watchvideo/:id", controller.GetWatchVideo)
+			router.POST("/watch_videos", controller.CreateWatchVideo)
+			router.PATCH("/watch_videos", controller.UpdateWatchVideo)
+			router.DELETE("/watchvideors/:id", controller.DeleteWatchVideo)
 
 		}
 	}
 
-	// User Routes
-	r.POST("/users", controller.CreateUser)
-
-	// Authentication Routes
+	// Signup User Route
+	r.POST("/signup", controller.CreateUser)
+	// login User Route
 	r.POST("/login", controller.Login)
 
-	// Run the server
-	r.Run()
+	// Run the server go run main.go
+	r.Run("localhost: " + PORT)
 }
 
 func CORSMiddleware() gin.HandlerFunc {

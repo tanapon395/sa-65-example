@@ -19,15 +19,15 @@ func CreateResolution(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
-	c.JSON(http.StatusOK, gin.H{"data": resolution})
+	c.JSON(http.StatusCreated, gin.H{"data": resolution})
 }
 
 // GET /resolution/:id
 func GetResolution(c *gin.Context) {
 	var resolution entity.Resolution
 	id := c.Param("id")
-	if err := entity.DB().Raw("SELECT * FROM resolutions WHERE id = ?", id).Scan(&resolution).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	if tx := entity.DB().Where("id = ?", id).First(&resolution); tx.RowsAffected == 0 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "resolution not found"})
 		return
 	}
 
