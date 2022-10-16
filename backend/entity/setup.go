@@ -35,7 +35,7 @@ func SetupDatabase() {
 	password, err := bcrypt.GenerateFromPassword([]byte("123456"), 14)
 
 	db.Model(&User{}).Create(&User{
-		Name:     "Chanwit",
+		Name:     "Tanapon",
 		Email:    "tanapon@gmail.com",
 		Password: string(password),
 	})
