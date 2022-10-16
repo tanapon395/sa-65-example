@@ -40,14 +40,14 @@ func GetPlaylist(c *gin.Context) {
 
 // GET /playlist/watched/user/:uid
 func GetPlaylistWatchedByUser(c *gin.Context) {
-	var playlists []entity.Playlist
+	var playlist entity.Playlist
 	owner_id := c.Param("owner_id")
-	if err := entity.DB().Preload("Owner").Preload("WatchVideos.Resolution").Preload("WatchVideos").Preload("WatchVideos.Video").Raw("SELECT * FROM playlists WHERE owner_id = ? AND title = ?", owner_id, "Watched").Find(&playlists).Error; err != nil {
+	if err := entity.DB().Preload("Owner").Preload("WatchVideos.Resolution").Preload("WatchVideos").Preload("WatchVideos.Video").Raw("SELECT * FROM playlists WHERE owner_id = ? AND title = ?", owner_id, "Watched").Find(&playlist).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"data": playlists})
+	c.JSON(http.StatusOK, gin.H{"data": playlist})
 }
 
 // GET /playlists

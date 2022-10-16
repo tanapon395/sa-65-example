@@ -42,7 +42,7 @@ function WatchVideos() {
       width: 150,
       valueFormatter: (params) => params.value.Title,
     },
-    { field: "WatchedTime", headerName: "วันที่และเวลา", width: 300 },
+    { field: "WatchedTime", headerName: "วันที่และเวลา", width: 250 },
   ];
 
   return (
