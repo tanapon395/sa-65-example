@@ -148,7 +148,7 @@ async function CreateUser(data: UsersInterface) {
     body: JSON.stringify(data),
   };
 
-  let res = await fetch(`${apiUrl}/users`, requestOptions)
+  let res = await fetch(`${apiUrl}/signup`, requestOptions)
     .then((response) => response.json())
     .then((res) => {
       if (res.data) {
