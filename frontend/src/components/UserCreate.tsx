@@ -79,7 +79,7 @@ function UserCreate() {
       <Snackbar
         id="success"
         open={success}
-        autoHideDuration={6000}
+        autoHideDuration={8000}
         onClose={handleClose}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
@@ -90,7 +90,7 @@ function UserCreate() {
       <Snackbar
         id="error"
         open={error}
-        autoHideDuration={6000}
+        autoHideDuration={8000}
         onClose={handleClose}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
