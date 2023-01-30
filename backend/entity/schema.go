@@ -8,9 +8,10 @@ import (
 
 type User struct {
 	gorm.Model
-	Name     string
-	Email    string `gorm:"uniqueIndex"`
+	Name     string `valid:"required~Name cannot be blank"`
+	Email    string `gorm:"uniqueIndex" valid:"email"`
 	Password string `json:"-"`
+	Role     string `valid:"required~Role cannot be blank"`
 	// 1 user เป็นเจ้าของได้หลาย video
 	Videos []Video `gorm:"foreignKey:OwnerID"`
 	// 1 user เป็นเจ้าของได้หลาย playlist

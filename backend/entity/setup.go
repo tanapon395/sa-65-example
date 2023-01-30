@@ -38,11 +38,13 @@ func SetupDatabase() {
 		Name:     "Tanapon",
 		Email:    "tanapon@gmail.com",
 		Password: string(password),
+		Role:     "employee",
 	})
 	db.Model(&User{}).Create(&User{
 		Name:     "Name",
 		Email:    "name@example.com",
 		Password: string(password),
+		Role:     "user",
 	})
 
 	var chanwit User

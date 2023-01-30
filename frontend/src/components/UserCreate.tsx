@@ -11,8 +11,15 @@ import Typography from "@mui/material/Typography";
 import Divider from "@mui/material/Divider";
 import Snackbar from "@mui/material/Snackbar";
 import MuiAlert, { AlertProps } from "@mui/material/Alert";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+
 import { UsersInterface } from "../interfaces/IUser";
+import { RoleInterface } from "../interfaces/IRole";
+
 import { CreateUser } from "../services/HttpClientService";
+import { useForm, SubmitHandler } from "react-hook-form";
+import { literal, object, string, TypeOf } from "zod";
+import { zodResolver } from "@hookform/resolvers/zod";
 
 const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   props,
@@ -21,10 +28,13 @@ const Alert = React.forwardRef<HTMLDivElement, AlertProps>(function Alert(
   return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
 });
 
+const role = [{ Name: "employee" }, { Name: "user" }];
+
 function UserCreate() {
   const [user, setUser] = React.useState<Partial<UsersInterface>>({});
   const [success, setSuccess] = React.useState(false);
   const [error, setError] = React.useState(false);
+  const [message, setAlertMessage] = React.useState("");
 
   const handleClose = (
     event?: React.SyntheticEvent | Event,
@@ -45,11 +55,21 @@ function UserCreate() {
     setUser({ ...user, [id]: value });
   };
 
+  const handleChange = (event: SelectChangeEvent) => {
+    const name = event.target.name as keyof typeof UserCreate;
+    setUser({
+      ...user,
+      [name]: event.target.value,
+    });
+  };
+
   async function submit() {
     let res = await CreateUser(user);
-    if (res) {
+    if (res.status) {
+      setAlertMessage("บันทึกข้อมูลสำเร็จ");
       setSuccess(true);
     } else {
+      setAlertMessage(res.message);
       setError(true);
     }
   }
@@ -57,23 +77,25 @@ function UserCreate() {
   return (
     <Container maxWidth="md">
       <Snackbar
+        id="success"
         open={success}
-        autoHideDuration={3000}
+        autoHideDuration={6000}
         onClose={handleClose}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert onClose={handleClose} severity="success">
-          บันทึกข้อมูลสำเร็จ
+          {message}
         </Alert>
       </Snackbar>
       <Snackbar
+        id="error"
         open={error}
         autoHideDuration={6000}
         onClose={handleClose}
         anchorOrigin={{ vertical: "top", horizontal: "center" }}
       >
         <Alert onClose={handleClose} severity="error">
-          บันทึกข้อมูลไม่สำเร็จ
+          {message}
         </Alert>
       </Snackbar>
       <Paper>
@@ -122,6 +144,26 @@ function UserCreate() {
                 value={user.Email || ""}
                 onChange={handleInputChange}
               />
+            </FormControl>
+          </Grid>
+          <Grid item xs={6}>
+            <FormControl fullWidth variant="outlined">
+              <p>ตำแหน่ง</p>
+              <Select
+                native
+                name="Role"
+                value={user.Role + ""}
+                onChange={handleChange}
+              >
+                <option aria-label="None" value="">
+                  กรุณาเลือกตำแหน่ง
+                </option>
+                {role.map((item: RoleInterface) => (
+                  <option value={item.Name} key={item.Name}>
+                    {item.Name}
+                  </option>
+                ))}
+              </Select>
             </FormControl>
           </Grid>
           <Grid item xs={6}>

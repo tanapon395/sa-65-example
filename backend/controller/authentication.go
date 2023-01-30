@@ -3,6 +3,7 @@ package controller
 import (
 	"net/http"
 
+	"github.com/asaskevich/govalidator"
 	"github.com/gin-gonic/gin"
 	"github.com/tanapon395/sa-65-example/entity"
 	"github.com/tanapon395/sa-65-example/service"
@@ -17,13 +18,15 @@ type LoginPayload struct {
 
 // SignUpPayload signup body
 type SignUpPayload struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name     string `json:"name" valid:"required~Name cannot be blank"`
+	Email    string `json:"email" valid:"email"`
+	Password string `json:"password" valid:"required~Password cannot be blank"`
+	Role     string `json:"role" valid:"required~Role cannot be blank"`
 }
 
 // LoginResponse token response
 type LoginResponse struct {
+	Role  string `json:"role"`
 	Token string `json:"token"`
 	ID    uint   `json:"id"`
 }
@@ -68,6 +71,7 @@ func Login(c *gin.Context) {
 	}
 
 	tokenResponse := LoginResponse{
+		Role:  user.Role,
 		Token: signedToken,
 		ID:    user.ID,
 	}
@@ -85,6 +89,12 @@ func CreateUser(c *gin.Context) {
 		return
 	}
 
+	// แทรกการ validate ไว้ช่วงนี้ของ controller
+	if _, err := govalidator.ValidateStruct(payload); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
 	// เข้ารหัสลับรหัสผ่านที่ผู้ใช้กรอกก่อนบันทึกลงฐานข้อมูล
 	hashPassword, err := bcrypt.GenerateFromPassword([]byte(payload.Password), 14)
 	if err != nil {
@@ -95,6 +105,7 @@ func CreateUser(c *gin.Context) {
 	user.Name = payload.Name
 	user.Email = payload.Email
 	user.Password = string(hashPassword)
+	user.Role = payload.Role
 
 	if err := entity.DB().Create(&user).Error; err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})

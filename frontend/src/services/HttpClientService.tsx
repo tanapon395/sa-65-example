@@ -16,6 +16,7 @@ async function Login(data: SigninInterface) {
     .then((response) => response.json())
     .then((res) => {
       if (res.data) {
+        localStorage.setItem("role", res.data.role);
         localStorage.setItem("token", res.data.token);
         localStorage.setItem("uid", res.data.id);
         return res.data;
@@ -152,9 +153,9 @@ async function CreateUser(data: UsersInterface) {
     .then((response) => response.json())
     .then((res) => {
       if (res.data) {
-        return res.data;
+        return { status: true, message: res.data };
       } else {
-        return false;
+        return { status: false, message: res.error };
       }
     });
 

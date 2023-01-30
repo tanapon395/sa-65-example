@@ -82,13 +82,19 @@ const Drawer = styled(MuiDrawer, {
 const mdTheme = createTheme();
 
 const menu = [
-  { name: "หน้าแรก", icon: <HomeIcon />, path: "/" },
-  { name: "สมาชิก", icon: <PeopleIcon />, path: "/users" },
-  { name: "การเข้าชมวีดีโอ", icon: <YouTubeIcon />, path: "/watch_videos" },
+  { name: "หน้าแรก", icon: <HomeIcon />, path: "/", role: "employee" },
+  { name: "สมาชิก", icon: <PeopleIcon />, path: "/users", role: "employee" },
+  {
+    name: "การเข้าชมวีดีโอ",
+    icon: <YouTubeIcon />,
+    path: "/watch_videos",
+    role: "employee",
+  },
 ];
 
 function App() {
   const [token, setToken] = useState<String>("");
+  const [role, setRole] = useState<String | null>("");
   const [open, setOpen] = React.useState(true);
   const toggleDrawer = () => {
     setOpen(!open);
@@ -96,8 +102,10 @@ function App() {
 
   useEffect(() => {
     const token = localStorage.getItem("token");
+    const role = localStorage.getItem("role");
     if (token) {
       setToken(token);
+      setRole(role);
     }
   }, []);
 
@@ -162,18 +170,21 @@ function App() {
             </Toolbar>
             <Divider />
             <List>
-              {menu.map((item, index) => (
-                <Link
-                  to={item.path}
-                  key={item.name}
-                  style={{ textDecoration: "none", color: "inherit" }}
-                >
-                  <ListItem button>
-                    <ListItemIcon>{item.icon}</ListItemIcon>
-                    <ListItemText primary={item.name} />
-                  </ListItem>
-                </Link>
-              ))}
+              {menu.map(
+                (item, index) =>
+                  role === item.role && (
+                    <Link
+                      to={item.path}
+                      key={item.name}
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      <ListItem button>
+                        <ListItemIcon>{item.icon}</ListItemIcon>
+                        <ListItemText primary={item.name} />
+                      </ListItem>
+                    </Link>
+                  )
+              )}
             </List>
           </Drawer>
           <Box
